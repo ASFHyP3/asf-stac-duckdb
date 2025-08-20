@@ -9,3 +9,5 @@ pandas
 shapely
 fastapi
 mangum
+pytz
+tzdata

@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import traceback
 from typing import (
     Any,
     Dict,
@@ -191,6 +192,7 @@ class DatabaseLogic:
 
                 except Exception as db_error:
                     print(f"Database error in get_one_item: {str(db_error)}")
+                    traceback.print_exc()
                     raise HTTPException(
                         status_code=500, detail=f"Error querying item: {str(db_error)}"
                     )
@@ -729,6 +731,7 @@ class DatabaseLogic:
             if "not found" in str(e).lower():
                 from stac_fastapi.types.errors import NotFoundError
                 raise NotFoundError(f"Collections '{collection_ids}' do not exist")
+            traceback.print_exc()
             raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
         # Determine if there are more results and create next token

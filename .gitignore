@@ -2,6 +2,7 @@
 stac-fastapi-duckdb/
 */all_collections.parquet
 sam/duck-stac/.aws-sam/
+**/*.env
 
 # Created by https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
 

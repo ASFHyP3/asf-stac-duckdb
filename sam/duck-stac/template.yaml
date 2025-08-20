@@ -1,3 +1,13 @@
+# Build deps Layer:
+#   sam build DuckDependenciesLayer
+#
+# Build everything:
+#   sam build
+#
+# Local Run
+#   sam local start-api --env-vars dev.env
+
+
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: duck-stac
@@ -35,11 +45,12 @@ Resources:
         Variables:
           STAC_FILE_PATH: /var/task/data/stac_collections
           BACKEND: duckdb
+          TZ: UTC
           PARQUET_FILE_PATH: /var/task/data/all_collections.parquet
           PARQUET_URLS_JSON: |
             {
-              "glo-30-hand": "/var/task/data/all_collections.parquet",
-              "sentinel-1-global-coherence": "/var/task/data/all_collections.parquet"
+              "glo-30-hand": "s3://stacbuckets/all_collections.parquet",
+              "sentinel-1-global-coherence": "s3://stacbuckets/all_collections.parquet"
             }
 
       Events:
