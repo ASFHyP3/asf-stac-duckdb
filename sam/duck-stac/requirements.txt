@@ -1,0 +1,11 @@
+duckdb==1.2.2
+stac-fastapi-core==6.1.0
+sfeos-helpers==6.1.0
+wheel
+uvicorn
+starlette
+numpy==2.2.6 # https://github.com/aws/aws-sam-cli/issues/8101
+pandas
+shapely
+fastapi
+mangum

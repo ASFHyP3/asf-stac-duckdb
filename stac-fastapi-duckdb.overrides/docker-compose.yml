@@ -1,0 +1,27 @@
+services:
+  app-duckdb:
+    container_name: stac-fastapi-duckdb
+    image: stac-utils/stac-fastapi-duckdb
+    restart: always
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile
+    environment:
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8084
+      - RELOAD=true
+      - ENVIRONMENT=local
+      - WEB_CONCURRENCY=10
+      - STAC_FILE_PATH=/app/stac_collections
+      - BACKEND=duckdb
+      - PARQUET_URLS_JSON=${PARQUET_URLS_JSON}
+      - HTTP_CACHE_PATH=${HTTP_CACHE_PATH:-/tmp/duckdb_http_cache}
+    ports:
+      - "8085:8084"
+    volumes:
+      - ./../sam/duck-stac/code/data/stac_collections:/app/stac_collections
+      - ./../sam/duck-stac/code/data/:/data
+      # - ./stac_collections:/app/stac_collections
+      - ./stac_fastapi:/app/stac_fastapi
+    command:
+      bash -c "python -m stac_fastapi.duckdb.app"

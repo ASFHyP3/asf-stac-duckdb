@@ -1,0 +1,4 @@
+aws-sam-cli
+geopandas
+planetary_computer
+pystac_client

@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: duck-stac
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 10048
+
+Resources:
+  DuckDependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: duck-dependencies-layer
+      Description: Python dependencies DuckStac functions
+      ContentUri: ./ # Directory containing requirements.txt
+      CompatibleRuntimes:
+        - python3.11 # Or your desired Python runtime
+      RetentionPolicy: Retain
+    Metadata:
+      BuildMethod: python3.11
+
+  DuckStacFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: code/
+      Handler: stac_fastapi.duckdb.app.handler
+      Runtime: python3.11
+      Layers:
+        - !Ref DuckDependenciesLayer # Reference the defined layer
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          STAC_FILE_PATH: /var/task/data/stac_collections
+          BACKEND: duckdb
+          PARQUET_FILE_PATH: /var/task/data/all_collections.parquet
+          PARQUET_URLS_JSON: |
+            {
+              "glo-30-hand": "/var/task/data/all_collections.parquet",
+              "sentinel-1-global-coherence": "/var/task/data/all_collections.parquet"
+            }
+
+      Events:
+        DuckStac:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  DuckStacApi:
+    Description: "API Gateway endpoint URL for Prod stage for DuckStac function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  DuckStacFunction:
+    Description: "DuckStac Lambda Function ARN"
+    Value: !GetAtt DuckStacFunction.Arn
+  DuckStacFunctionIamRole:
+    Description: "Implicit IAM Role created for Duck Stac function"
+    Value: !GetAtt DuckStacFunctionRole.Arn
