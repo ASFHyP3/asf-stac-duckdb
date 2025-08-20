@@ -188,6 +188,7 @@ class DatabaseLogic:
                     item = create_stac_item(
                         df=df, collection_id=collection_id, item_id=item_id
                     )
+                    print(f"Return in get_one_item(): {item}")
                     return item
 
                 except Exception as db_error:
@@ -198,6 +199,7 @@ class DatabaseLogic:
                     )
 
         except HTTPException:
+            traceback.print_exc()
             raise
         except Exception as e:
             print(f"Unexpected error in get_one_item: {str(e)}")

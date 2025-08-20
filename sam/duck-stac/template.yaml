@@ -47,6 +47,9 @@ Resources:
           BACKEND: duckdb
           TZ: UTC
           PARQUET_FILE_PATH: /var/task/data/all_collections.parquet
+          AWS_ACCESS_KEY_ID: def_key
+          AWS_SECRET_ACCESS_KEY: def_sec
+          AWS_DEFAULT_REGION: us-east-2
           PARQUET_URLS_JSON: |
             {
               "glo-30-hand": "s3://stacbuckets/all_collections.parquet",

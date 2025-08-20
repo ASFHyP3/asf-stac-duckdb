@@ -11,6 +11,7 @@ from stac_fastapi.core.base_settings import ApiBaseSettings
 # from stac_fastapi.core.utilities import get_bool_env
 from stac_fastapi.types.config import ApiSettings
 
+conn = None
 
 class DuckDBSettings(ApiSettings, ApiBaseSettings):
     """DuckDB API settings and configuration."""
@@ -103,42 +104,47 @@ class DuckDBSettings(ApiSettings, ApiBaseSettings):
 
     @contextmanager
     def create_connection(self):
-        """Create a per-request DuckDB connection with httpfs and basic caching configured."""
-        conn = duckdb.connect(database=":memory:")
-        try:
-            # Enable remote I/O via httpfs where available
-            try:
-                conn.execute("INSTALL httpfs;")
-            except Exception:
-                pass
-            try:
-                conn.execute("LOAD httpfs;")
-            except Exception:
-                pass
-            # Best-effort caching knobs
-            try:
-                AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION", "us-west-2")
-                AWS_KEY =  os.getenv("AWS_ACCESS_KEY_ID")
-                AWS_SECRET = os.getenv("AWS_SECRET_ACCESS_KEY")
-                print(f"AWS  is {AWS_DEFAULT_REGION}/{AWS_KEY}/{AWS_SECRET}")
-                # set up secret
-                conn.execute(f"""
-                    CREATE SECRET secretaws (
-                        TYPE S3,
-                        PROVIDER CREDENTIAL_CHAIN,
-                        REGION '{AWS_DEFAULT_REGION}'
-                    );
-                """)
 
-                conn.execute("SET enable_http_metadata_cache=true")
-                conn.execute("SET enable_object_cache=true")
-                conn.execute("SET parquet_metadata_cache=true")
-            except Exception:
-                traceback.print_exc()
-                pass
+        global conn
+
+        """Create a per-request DuckDB connection with httpfs and basic caching configured."""
+
+        try:
+            if not conn:
+                # Don't try to keep DB in memory
+                conn = duckdb.connect(database="/tmp/stac.db")
+
+                # Enable remote I/O via httpfs where available
+                try:
+                    conn.execute("INSTALL httpfs;")
+                except Exception:
+                    pass
+                try:
+                    conn.execute("LOAD httpfs;")
+                except Exception:
+                    pass
+                # Best-effort caching knobs
+                try:
+                    AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION", "us-west-2")
+                    AWS_KEY =  os.getenv("AWS_ACCESS_KEY_ID")
+                    AWS_SECRET = os.getenv("AWS_SECRET_ACCESS_KEY")
+                    print(f"AWS  is {AWS_DEFAULT_REGION}/{AWS_KEY}/{AWS_SECRET}")
+                    # set up secret
+                    conn.execute(f"""
+                        CREATE SECRET IF NOT EXISTS secretaws (
+                            TYPE S3,
+                            PROVIDER CREDENTIAL_CHAIN,
+                            REGION '{AWS_DEFAULT_REGION}'
+                        );
+                    """)
+
+                    conn.execute("SET enable_http_metadata_cache=true")
+                    conn.execute("SET enable_object_cache=true")
+                    conn.execute("SET parquet_metadata_cache=true")
+                except Exception:
+                    traceback.print_exc()
+                    pass
             yield conn
         finally:
-            try:
-                conn.close()
-            except Exception:
-                pass
+            pass
+
