@@ -111,8 +111,9 @@ class DuckDBSettings(ApiSettings, ApiBaseSettings):
 
         try:
             if not conn:
-                # Don't try to keep DB in memory
                 conn = duckdb.connect(database="/tmp/stac.db")
+
+                #conn.execute("SET home_directory='/root/'")
 
                 # Enable remote I/O via httpfs where available
                 try:
@@ -141,6 +142,7 @@ class DuckDBSettings(ApiSettings, ApiBaseSettings):
                     conn.execute("SET enable_http_metadata_cache=true")
                     conn.execute("SET enable_object_cache=true")
                     conn.execute("SET parquet_metadata_cache=true")
+
                 except Exception:
                     traceback.print_exc()
                     pass

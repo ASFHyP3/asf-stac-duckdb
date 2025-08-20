@@ -5,8 +5,10 @@
 #   sam build
 #
 # Local Run
-#   sam local start-api --env-vars dev.env
-
+#   sam local start-api --region us-east-2 --profile <profile>
+#
+# Deploy
+#   sam deploy stack_name=duck-stac --no-confirm-changeset --region us-east-2 --profile <profile>
 
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
@@ -47,29 +49,33 @@ Resources:
           BACKEND: duckdb
           TZ: UTC
           PARQUET_FILE_PATH: /var/task/data/all_collections.parquet
-          AWS_ACCESS_KEY_ID: def_key
-          AWS_SECRET_ACCESS_KEY: def_sec
-          AWS_DEFAULT_REGION: us-east-2
+          HOME: "/tmp/"
+          #AWS_ACCESS_KEY_ID: def_key
+          #AWS_SECRET_ACCESS_KEY: def_sec
+          #AWS_DEFAULT_REGION: us-east-2
           PARQUET_URLS_JSON: |
             {
               "glo-30-hand": "s3://stacbuckets/all_collections.parquet",
               "sentinel-1-global-coherence": "s3://stacbuckets/all_collections.parquet"
             }
-
+      Policies:
+        - S3FullAccessPolicy:
+            BucketName: stacbuckets
       Events:
         DuckStac:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Type: HttpApi # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
+            ApiId: !Ref ExplicitApiHttpApi
             Path: /{proxy+}
             Method: ANY
 
+  ExplicitApiHttpApi:
+    Type: AWS::Serverless::HttpApi
+
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   DuckStacApi:
     Description: "API Gateway endpoint URL for Prod stage for DuckStac function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Value: !Sub "https://${ExplicitApiHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
   DuckStacFunction:
     Description: "DuckStac Lambda Function ARN"
     Value: !GetAtt DuckStacFunction.Arn
