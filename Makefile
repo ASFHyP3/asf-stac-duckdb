@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 .DEFAULT_GOAL := help
 
-AWS_DEFAULT_REGION ?= us-east-2
+AWS_DEFAULT_REGION ?= us-west-2
 AWS_DEFAULT_PROFILE ?= default
 STACK_NAME ?= duck-stac
 
@@ -33,7 +33,6 @@ sam-image: ## Create a sam docker image
 shell: sam-image ## Run SAM inside container
 	docker run -it \
 		-v .:/sam/ \
-		-v .
 		-v $$HOME/.aws/:/root/.aws \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-e STACK_NAME \
