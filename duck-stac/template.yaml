@@ -1,0 +1,96 @@
+# Build deps Layer:
+#   sam build DuckDependenciesLayer
+#
+# Build everything:
+#   sam build
+#
+# Local Run
+#   sam local start-api --region us-east-2 --profile <profile>
+#
+# Deploy
+#   sam deploy --stack-name=duck-stac --no-confirm-changeset --region us-east-2 --profile <profile>
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: serverless-duckdb-stac
+
+Parameters:
+  LambdaTimeout:
+    Default: 30
+    Description: 'Max lambda execution time in seconds'
+    Type: Number
+  LambdaMemorySize:
+    Default: 2048
+    Description: 'Max lambda Memory in Mb'
+    Type: Number
+  StacParquetLocations:
+    Default: |
+            {
+              "glo-30-hand": "s3://stacbuckets/all_collections.parquet",
+              "sentinel-1-global-coherence": "s3://stacbuckets/all_collections.parquet"
+            }
+#            {
+#              "glo-30-hand": "/var/task/data/parquet_files/all_collections.parquet",
+#              "sentinel-1-global-coherence": "/var/task/data/parquet_files/all_collections.parquet"
+#            }
+    Description: 'JSON Object pointing to collections Location of'
+    Type: String
+  StacBucketName:
+    Description: 'Optional Bucket to grant lambda access to'
+    Type: String
+    Default: 'stacbuckets'
+
+Conditions:
+  IsS3: !Not [!Equals [!Ref StacBucketName, ""]]
+
+Resources:
+  DuckDependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: duck-dependencies-layer
+      Description: Python dependencies DuckStac functions
+      ContentUri: ./
+      CompatibleRuntimes:
+        - python3.11
+      RetentionPolicy: Retain
+    Metadata:
+      BuildMethod: python3.11
+
+  DuckStacFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda_root/
+      Handler: stac_fastapi.duckdb.app.handler
+      Runtime: python3.11
+      MemorySize: !Ref LambdaMemorySize
+      Timeout: !Ref LambdaTimeout
+      Layers:
+        - !Ref DuckDependenciesLayer
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          STAC_FILE_PATH: /var/task/data/stac_collections
+          BACKEND: duckdb
+          TZ: UTC             # Avoid Timezone Error
+          HOME: "/tmp/"       # Otherwise DuckDB breaks
+          PARQUET_URLS_JSON: !Ref StacParquetLocations
+      Policies:
+        - S3FullAccessPolicy:
+            Condition: IsS3
+            BucketName: !Ref StacBucketName
+      Events:
+        DuckStac:
+          Type: HttpApi # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            ApiId: !Ref ExplicitApiHttpApi
+            Path: /{proxy+}
+            Method: ANY
+
+  ExplicitApiHttpApi:
+    Type: AWS::Serverless::HttpApi
+
+Outputs:
+  DuckStacApi:
+    Description: "API Gateway endpoint URL for Prod stage for DuckStac function"
+    Value: !Sub "https://${ExplicitApiHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
