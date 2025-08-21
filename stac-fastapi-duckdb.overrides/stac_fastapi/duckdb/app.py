@@ -125,23 +125,10 @@ def create_handler(app):
 
 def handler(event, context):
     from mangum import Mangum
-    import base64
-    import brotli
 
     #print(f"Event: {event}")
     asgi_handler = Mangum(app)
     response = asgi_handler(event, context) # Call the instance with the event arguments
     #print(f"Response: {response}")
 
-    # Decode brotli compression, there should be a better way.
-    if response.get("isBase64Encoded"):
-        response = {
-            "statusCode": response.get("statusCode"),
-            "body": brotli.decompress(base64.b64decode(response.get("body"))),
-            'headers': {
-                'Content-Type': 'application/json',
-            },
-        }
-
     return response
-
