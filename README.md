@@ -7,10 +7,10 @@ Built from https://github.com/Healy-Hyperspatial/stac-fastapi-duckdb/
 ```shell
 
 # Clone repo + submodule
-git clone --recursive git@github.com:ua-asf/asf-stack-duckdb.git
+git clone --recursive git@github.com:ua-asf/asf-stac-duckdb.git
 
 # cd into directory
-cd asf-stack-duckdb
+cd asf-stac-duckdb
 ```
 
 ## Get collection data
@@ -72,7 +72,7 @@ PARQUET_URLS_JSON='{"<collection-1>":"s3://<bucket>/<collection-1>.parquet","<co
 
 ```shell
 # cd into cloned directory
-cd asf-stack-duckdb
+cd asf-stac-duckdb
 
 # cd into stac submodule 
 cd stac-fastapi-duckdb
