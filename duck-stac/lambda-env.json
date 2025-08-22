@@ -1,0 +1,6 @@
+{
+  "DuckStacFunction": {
+    "HOME": "/tmp/",
+    "__comment": "This blocks SAM local from exporting invalid $HOME"
+  }
+}

@@ -15,6 +15,7 @@ build: ## Build SAM app
 local: ## Run SAM local development server
 	cd duck-stac && \
 	sam local start-api \
+  		--env-vars lambda-env.json \
 		--region $(AWS_DEFAULT_REGION) \
 		--profile $(AWS_DEFAULT_PROFILE)
 
