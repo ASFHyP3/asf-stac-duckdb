@@ -1,0 +1,12 @@
+name: Static analysis
+
+on: push
+
+jobs:
+  call-secrets-analysis-workflow:
+    # Docs: https://github.com/ASFHyP3/actions
+    uses: ASFHyP3/actions/.github/workflows/reusable-secrets-analysis.yml@v0.20.0
+    permissions:
+      contents: read
+
+  # TODO: Do we want to run `ruff` and `mypy` on the Python code?
