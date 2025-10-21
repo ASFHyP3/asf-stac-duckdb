@@ -5,8 +5,5 @@ channels:
 dependencies:
   - python>=3.10
   - pip
-  - geopandas
-  - planetary-computer
-  - pystac-client
   - pip:
     - aws-sam-cli
