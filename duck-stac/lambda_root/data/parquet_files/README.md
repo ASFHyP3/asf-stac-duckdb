@@ -1,1 +1,0 @@
-# Put stac collection Parquets here to read locally
