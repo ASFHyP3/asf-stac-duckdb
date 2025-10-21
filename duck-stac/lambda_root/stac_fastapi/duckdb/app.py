@@ -1,4 +1,7 @@
-"""FastAPI application."""
+"""
+Sourced from: https://github.com/Healy-Hyperspatial/stac-fastapi-duckdb
+FastAPI application.
+"""
 
 import os
 from contextlib import asynccontextmanager

@@ -1,4 +1,7 @@
-"""Database logic."""
+"""
+Sourced from: https://github.com/Healy-Hyperspatial/stac-fastapi-duckdb
+Database logic.
+"""
 import json
 import logging
 import os

@@ -1,4 +1,7 @@
-"""DuckDB Filter Client for STAC API filtering."""
+"""
+Sourced from: https://github.com/Healy-Hyperspatial/stac-fastapi-duckdb
+DuckDB Filter Client for STAC API filtering.
+"""
 
 from typing import Any, Dict, List, Optional
 

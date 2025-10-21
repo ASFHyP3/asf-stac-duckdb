@@ -1,4 +1,7 @@
-"""DuckDB runtime configuration and data source mapping."""
+"""
+Sourced from: https://github.com/Healy-Hyperspatial/stac-fastapi-duckdb
+DuckDB runtime configuration and data source mapping.
+"""
 import json
 import logging
 import os

@@ -1,4 +1,7 @@
-"""Database utility functions."""
+"""
+Sourced from: https://github.com/Healy-Hyperspatial/stac-fastapi-duckdb
+Database utility functions.
+"""
 import struct
 from datetime import date, datetime
 from logging import getLogger
