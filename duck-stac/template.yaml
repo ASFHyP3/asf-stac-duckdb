@@ -26,19 +26,15 @@ Parameters:
   StacParquetLocations:
     Default: |
             {
-              "glo-30-hand": "s3://stacbuckets/all_collections.parquet",
-              "sentinel-1-global-coherence": "s3://stacbuckets/all_collections.parquet"
+              "glo-30-hand": "s3://asf-stac-bucket/glo-30-hand.parquet",
+              "sentinel-1-global-coherence": "s3://asf-stac-bucket/sentinel-1-global-coherence.parquet"
             }
-#            {
-#              "glo-30-hand": "/var/task/data/parquet_files/all_collections.parquet",
-#              "sentinel-1-global-coherence": "/var/task/data/parquet_files/all_collections.parquet"
-#            }
     Description: 'JSON Object pointing to collections Location of'
     Type: String
   StacBucketName:
     Description: 'Optional Bucket to grant lambda access to'
     Type: String
-    Default: 'stacbuckets'
+    Default: 'asf-stac-bucket'
 
 Conditions:
   IsS3: !Not [!Equals [!Ref StacBucketName, ""]]
