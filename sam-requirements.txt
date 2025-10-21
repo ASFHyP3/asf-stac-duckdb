@@ -1,4 +1,15 @@
+# Requirements for SAM Deployment
 aws-sam-cli
 geopandas
 planetary_computer
 pystac_client
+duckdb==1.2.2
+stac-fastapi-core==6.3.0
+sfeos-helpers==6.3.0
+uvicorn
+starlette
+numpy==1.26.4
+pandas==2.3.0
+shapely
+fastapi
+mangum

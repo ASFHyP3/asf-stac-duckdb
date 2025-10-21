@@ -3,7 +3,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 AWS_DEFAULT_REGION ?= us-west-2
-AWS_DEFAULT_PROFILE ?= default
+AWS_DEFAULT_PROFILE ?= asf-stac
 STACK_NAME ?= duck-stac
 
 help: ## Show this help
@@ -26,7 +26,7 @@ deploy: build ## Build and deploy SAM app
 		--no-confirm-changeset \
 		--no-fail-on-empty-changeset \
 		--region $(AWS_DEFAULT_REGION) \
-		--profile $(AWS_DEFAULT_PROFILE)
+		--profile asf-stac
 
 sam-image: ## Create a sam docker image
 	docker build -t sam-runner -f sam.Dockerfile .

@@ -1,11 +1,11 @@
+# Requirements for Lambda
 duckdb==1.2.2
-stac-fastapi-core==6.1.0
-sfeos-helpers==6.1.0
-# wheel # Maybe unnecessary
+stac-fastapi-core==6.3.0
+sfeos-helpers==6.3.0
 uvicorn
 starlette
-numpy==2.2.6 # https://github.com/aws/aws-sam-cli/issues/8101
-pandas
+numpy==1.26.4
+pandas==2.3.0
 shapely
 fastapi
 mangum
