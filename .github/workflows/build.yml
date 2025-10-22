@@ -24,7 +24,7 @@ jobs:
         with:
           environment-file: environment.yml
           create-args: >-
-            python=3.14
+            python=3.11
 
       - name: Build in conda environment
         shell: bash -l {0}
