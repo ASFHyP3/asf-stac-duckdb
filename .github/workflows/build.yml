@@ -1,0 +1,32 @@
+name: Check that SAM can build successfully
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  call-version-info-workflow:
+    # Docs: https://github.com/ASFHyP3/actions
+    uses: ASFHyP3/actions/.github/workflows/reusable-version-info.yml@v0.20.0
+    permissions:
+      contents: read
+    with:
+      python_version: "3.11"
+
+  build-with-sam:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-file: environment.yml
+          create-args: >-
+            python=3.11
+
+      - name: Build in conda environment
+        shell: bash -l {0}
+        run: |
+          make build

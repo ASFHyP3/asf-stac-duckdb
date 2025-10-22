@@ -2,17 +2,6 @@
 
 Built from https://github.com/Healy-Hyperspatial/stac-fastapi-duckdb/
 
-## Set up environment
-
-```shell
-
-# Clone repo + submodule
-git clone --recursive git@github.com:ua-asf/asf-stac-duckdb.git
-
-# cd into directory
-cd asf-stac-duckdb
-```
-
 ## Get collection data
 
 ### Create collection JSON files:
@@ -57,35 +46,9 @@ s3 cp sentinel-1-global-coherence.parquet s3://stac-bucket/
 * [`duck-stac/lambda_root/data/stac_collections/glo-30-hand/collection.json`](duck-stac/lambda_root/data/stac_collections/glo-30-hand/collection.json)
 * [`duck-stac/lambda_root/data/stac_collections/sentinel-1-global-coherence/collection.json`](duck-stac/lambda_root/data/stac_collections/sentinel-1-global-coherence/collection.json)
 
-
-## Run as docker container
-
-### Setup
-
-adjust `PARQUET_URLS_JSON` value in submodule Makefile @`stac-fastapi-duckdb/Makefile`
-
-```
-PARQUET_URLS_JSON='{"<collection-1>":"s3://<bucket>/<collection-1>.parquet","<collection-2>":"s3://<bucket>/<collection-2>.parquet"}'
-```
-
-### Start local server
-
-```shell
-# cd into cloned directory
-cd asf-stac-duckdb
-
-# cd into stac submodule 
-cd stac-fastapi-duckdb
-
-# Start foreground server
-make up
-```
-
-You can then access the host from http://localhost:8085
-
 ## AWS SAM
 
-### Setup 
+### Setup
 
 #### Template Parameters that might need to be adjusted:
 
@@ -99,7 +62,6 @@ bucket specified in `StacParquetLocations`.
 
 *  `LambdaMemorySize` - default to 2048
 *  `LambdaTimeout` - default to 30 seconds
-
 
 ### Run SAM Local server (Must have [`aws-sam-cli`](https://pypi.org/project/aws-sam-cli/) installed)
 

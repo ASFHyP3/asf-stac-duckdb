@@ -56,8 +56,7 @@ class DatabaseLogic:
 
     """CORE LOGIC"""
 
-    # Connection creation and source resolution are provided by settings
-
+    # TODO: This function will need to support the `Sort` extension to upgrade to newer versions of stac-fastapi
     async def get_all_collections(
         self, token: Optional[str], limit: int, request: Request
     ) -> Tuple[List[Dict[str, Any]], Optional[str]]:

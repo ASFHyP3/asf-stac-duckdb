@@ -1,0 +1,44 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  call-version-info-workflow:
+    # Docs: https://github.com/ASFHyP3/actions
+    uses: ASFHyP3/actions/.github/workflows/reusable-version-info.yml@v0.20.0
+    permissions:
+      contents: read
+    with:
+      python_version: "3.11"
+
+  build-with-sam:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-file: environment.yml
+          create-args: >-
+            python=3.11
+
+      - uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.ROLE_ARN }}
+          aws-region: us-west-2
+          aws-access-key-id: ${{ secrets.V2_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.V2_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Build in conda environment
+        shell: bash -l {0}
+        run: |
+          cd duck-stac && \ 
+          sam build && \
+          sam deploy \
+            --stack-name=asf-stac \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --region=us-west-2
