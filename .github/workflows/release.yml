@@ -19,10 +19,9 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v5
         with:
-          role-to-assume: ${{ secrets.ROLE_ARN }}
           aws-region: us-west-2
-          aws-access-key-id: ${{ secrets.V2_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.V2_AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.SAM_AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.SAM_AWS_SECRET_ACCESS_KEY }}
 
       - name: Build in conda environment
         shell: bash -l {0}
