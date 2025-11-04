@@ -32,4 +32,8 @@ jobs:
             --stack-name=duck-stac \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
-            --region=us-west-2
+            --region=us-west-2 \
+            --parameter-overrides \
+                ApiCustomDomainName=stac.asf.alaska.edu \
+                AcmCertificateArn=${{ secrets.CERTIFICATE_ARN }} \
+                ApiBasePath=""

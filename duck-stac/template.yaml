@@ -1,15 +1,3 @@
-# Build deps Layer:
-#   sam build DuckDependenciesLayer
-#
-# Build everything:
-#   sam build
-#
-# Local Run
-#   sam local start-api --region us-east-2 --profile <profile>
-#
-# Deploy
-#   sam deploy --stack-name=duck-stac --no-confirm-changeset --region us-east-2 --profile <profile>
-
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: serverless-duckdb-stac
@@ -19,10 +7,12 @@ Parameters:
     Default: 30
     Description: 'Max lambda execution time in seconds'
     Type: Number
+
   LambdaMemorySize:
     Default: 2048
     Description: 'Max lambda Memory in Mb'
     Type: Number
+
   StacParquetLocations:
     Default: |
             {
@@ -31,13 +21,28 @@ Parameters:
             }
     Description: 'JSON Object pointing to collections Location of'
     Type: String
+
   StacBucketName:
     Description: 'Optional Bucket to grant lambda access to'
     Type: String
     Default: 'asf-stac-bucket'
 
+  ApiCustomDomainName:
+    Type: String
+    Description: "Custom domain for the HTTP API (e.g., api.example.com)"
+
+  AcmCertificateArn:
+    Type: String
+    Description: "ACM certificate ARN in the SAME region as this API (imported cert)"
+
+  ApiBasePath:
+    Type: String
+    Default: ""
+    Description: "Optional base path for API mapping (leave empty for root mapping)"
+
 Conditions:
   IsS3: !Not [!Equals [!Ref StacBucketName, ""]]
+  HasBasePath: !Not [!Equals [!Ref ApiBasePath, ""]]
 
 Resources:
   DuckDependenciesLayer:
@@ -51,6 +56,12 @@ Resources:
       RetentionPolicy: Retain
     Metadata:
       BuildMethod: python3.11
+
+  ExplicitApiHttpApi:
+    Type: AWS::Serverless::HttpApi
+    # NOTE: We do NOT set the "Domain" property here so we can
+    # create explicit DomainName/ApiMapping resources and export
+    # their DNS targets for external DNS providers.
 
   DuckStacFunction:
     Type: AWS::Serverless::Function
@@ -77,16 +88,53 @@ Resources:
             BucketName: !Ref StacBucketName
       Events:
         DuckStac:
-          Type: HttpApi # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Type: HttpApi
           Properties:
             ApiId: !Ref ExplicitApiHttpApi
             Path: /{proxy+}
             Method: ANY
 
-  ExplicitApiHttpApi:
-    Type: AWS::Serverless::HttpApi
+  ApiDomainName:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !Ref ApiCustomDomainName
+      DomainNameConfigurations:
+        - CertificateArn: !Ref AcmCertificateArn
+          EndpointType: REGIONAL
+          SecurityPolicy: TLS_1_2
+
+  ApiDomainMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      ApiId: !Ref ExplicitApiHttpApi
+      DomainName: !Ref ApiDomainName
+      Stage: '$default'
+      ApiMappingKey: !If [HasBasePath, !Ref ApiBasePath, !Ref 'AWS::NoValue']
 
 Outputs:
   DuckStacApi:
-    Description: "API Gateway endpoint URL for Prod stage for DuckStac function"
+    Description: "Execute-API URL for $default stage"
     Value: !Sub "https://${ExplicitApiHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
+
+  CustomDomainName:
+    Description: "Custom domain for the API"
+    Value: !Ref ApiCustomDomainName
+
+  CustomDomainBasePath:
+    Description: "Base path mapping (empty => root)"
+    Value: !Ref ApiBasePath
+
+  ApiGatewayRegionalDomainName:
+    Description: "Target DNS name for your external ALIAS/ANAME/CNAME"
+    Value: !GetAtt ApiDomainName.RegionalDomainName
+
+  ApiGatewayRegionalHostedZoneId:
+    Description: "HostedZoneId for ALIAS records (some DNS providers need this)"
+    Value: !GetAtt ApiDomainName.RegionalHostedZoneId
+
+  CustomDomainInvokeUrl:
+    Description: "Final HTTPS URL (works after your external DNS points to the RegionalDomainName)"
+    Value: !If
+      - HasBasePath
+      - !Sub "https://${ApiCustomDomainName}/${ApiBasePath}"
+      - !Sub "https://${ApiCustomDomainName}"
